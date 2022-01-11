@@ -1,0 +1,44 @@
+{% extends 'base.html' %} 
+{% block content %} 
+
+
+  
+		    
+		      <div class="container-fluid">			  
+
+				
+		  			{% for col in trending %}
+
+				  <div class="col-sm-6 col-md-6 thumbnail ">
+				  	<div class="col-md-8 ">
+					    <div class="f ">
+					      <div class="embed-responsive embed-responsive-4by3">
+							<iframe frameborder="0" class="embed-responsive-item" src={{ col.video.downloadAddr }}></iframe>
+						  </div>
+					    </div>
+				    </div>
+				  	<div class="col-md-4 ">
+				  		<h5>{{ col.desc}}</h5>
+				  		 <ul class="caption">
+					        <li><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-heart" aria-hidden="true">{{ col.stats.diggCount }}</span></button></li>
+					        <li><button type="button" class="btn btn-info"><span class="glyphicon glyphicon-comment" aria-hidden="true">{{ col.stats.commentCount }}</span></button></li>
+					        <li><button type="button" class="btn btn-warning"><span class="glyphicon glyphicon-share" aria-hidden="true">{{ col.stats.shareCount }}</span></button></li>
+					        <li><button type="button" class="btn btn-success"><span class="glyphicon glyphicon-play" aria-hidden="true">{{ col.stats.playCount }}</span></button></li>
+					        <li><a href="https://www.tiktok.com/@{{ col.author.uniqueId}}/video/{{col.video.id }}" target="_blank">{{col.author.uniqueId}}</a></li>
+					    </ul>
+				  	</div>
+				  </div>
+		  			{% endfor %}				  
+				
+
+			  </div>
+
+
+		    
+
+{% endblock %}
+<style>
+
+ 
+	 
+</style>

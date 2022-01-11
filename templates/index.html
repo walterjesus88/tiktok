@@ -1,0 +1,82 @@
+<!-- <!doctype html>
+<html>
+
+<body style="font-family:arial, sans-serif">
+    <h1 style="background:lightblue;padding:10px">
+            TikTok
+    </h1>
+    
+    <p>Click to see charts on different pages</p>
+
+
+
+    
+    <h1><a href="chart1">Fruit in North America</a></h1>
+    <h1><a href="chart2">Vegetables in Europe</a></h1>
+
+</body>
+</html> -->
+
+
+{% extends 'base.html' %} 
+{% block content %} 
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+    	<form class="form-inline" method="POST" action="{{ url_for('index') }}">
+	  		<label for="exampleFormControlInput1" class="form-label">Escriba el usuario a filtrar</label>
+	  		<input type="text" class="form-control" id="filter" name="user">
+	  		<button type="submit" class="btn btn-info">Filtrar</button>
+  		</form>
+    </div>
+    <div class="col-md-6">
+    	<form class="form-inline" method="POST" action="{{ url_for('procesar') }}">
+		  <div class="form-group">
+		    <div class="input-group">
+		        <span class="input-group-addon">Ingrese la cuenta para agregar</span>
+		    		<input name="text">
+		    </div>
+		    <button type="submit" class="btn btn-success">Agregar</button>
+		  </div>
+		</form>
+    </div>
+  </div>
+</div>
+<div class="container">
+	<div class="row">
+		<table class="table table-striped">
+		  <thead>
+		    <tr>
+		      <th scope="col">#</th>
+		      <th scope="col">Usuario</th>
+		      <th scope="col">descripcion</th>
+		      <th scope="col">diggCount</th>
+		      <th scope="col">shareCount</th>
+		      <th scope="col">commentCount</th>
+		      <th scope="col">playCount</th>
+		      <th scope="col">fecha</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		  	{% for col in collections %}
+		    <tr>
+		      <th scope="row">1</th>
+		      <td>{{ col.user }}</td>
+		      <td>{{ col.descripcion }}</td>
+		      <td>{{ col.diggCount }}</td>
+		      <td>{{ col.shareCount }}</td>
+		      <td>{{ col.commentCount }}</td>
+		      <td>{{ col.playCount }}</td>
+		      <td>{{ col.fecha }}</td>
+
+		    </tr>
+		  	{% endfor %}
+		  
+		  </tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

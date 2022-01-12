@@ -32,7 +32,7 @@ def get_username(cuenta):
 	count = 30
 	print('---cuenta--')
 	print(cuenta)
-	tiktoks = api.by_username(cuenta, count=count,region='US')
+	tiktoks = api.by_username(cuenta, count=count)
 	print(tiktoks)
 
 	#print(user)

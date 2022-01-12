@@ -25,7 +25,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install playwright==1.12.0
-        python -m playwright install
+        python -m playwright==1.12.0 install
+        npm install playwright
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
       run: |

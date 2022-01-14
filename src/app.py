@@ -53,6 +53,24 @@ def get_username(cuenta):
 	df.to_excel( cuenta + ".xlsx",index=False)
 	return df
 
+def get_hashtag(cuenta):
+	api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
+	hasttag = api.by_hashtag(cuenta, count=30)
+	# data = []
+
+	# for tiktok in hasttag:
+	# 	json = {'id': tiktok['id'],'descripcion':tiktok['desc'],
+	# 			'diggCount':tiktok['stats']['diggCount'],'shareCount':tiktok['stats']['shareCount'],
+	# 			'commentCount':tiktok['stats']['commentCount'],'playCount':tiktok['stats']['playCount'],
+	# 			'fecha':tiktok['createTime']
+	# 			}
+
+	# 	data.append(json)
+
+	# df = pd.DataFrame(data=data)
+
+	return hasttag
+
 def get_database():
     from pymongo import MongoClient
     import pymongo
@@ -122,6 +140,17 @@ def trending():
 
 	return render_template("trending.html",trending=trendingChallenges)
 
+@app.route('/hashtag',methods=['GET','POST'])
+def hashtag():
+	#api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
+
+	#hashtag = api.by_hashtag(count = 30)
+
+	#for tiktok in trendingChallenges:
+  	#	print(tiktok)
+
+	return render_template("hashtag.html")
+
 
 @app.route("/procesar" , methods=['GET','POST'])
 def procesar():
@@ -133,6 +162,19 @@ def procesar():
     f=insert_pymongo(cuenta,df)
 
     return render_template('notdash2.html')
+
+
+@app.route("/procesarhashtag" , methods=['GET','POST'])
+def procesarhashtag():
+    #if request.method == 'POST':
+    cuenta = request.form['text']
+    print(cuenta)
+    print('cuenta')
+
+    df = get_hashtag(cuenta)
+    print(df)
+    return render_template("hashtag.html",hashtag=df)
+
 
 @app.route("/lista/<int:id>")
 def list(id):

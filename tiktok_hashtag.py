@@ -3,8 +3,8 @@ import pandas as pd
 api = TikTokApi.get_instance()
 
 count = 30
-
-tiktoks = api.by_hashtag("python", count=count)
+cuenta = str(input("Escribe by_hashtag tiktok analizar: "))
+tiktoks = api.by_hashtag(cuenta, count=count)
 
 data = []
 

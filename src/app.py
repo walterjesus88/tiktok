@@ -1,6 +1,7 @@
 #https://github.com/davidteather/TikTok-Api/issues/750
 from TikTokApi import TikTokApi
 import pandas as pd
+import os
 import datetime
 import json
 from flask import Flask, request, render_template
@@ -9,6 +10,7 @@ from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms.fields import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
+from flask import send_file
 
 #app = Flask(__name__)
 app = Flask(__name__,template_folder='../templates')
@@ -46,29 +48,40 @@ def get_username(cuenta):
 				}
 		data.append(json)
 
+	directory = 'byusername'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
 	df = pd.DataFrame(data=data)
-	print(df)
 	df['id'] = df['id'].apply(str)
 	df['fecha'] = df['fecha'].apply(convert_unix_date)
-	df.to_excel( cuenta + ".xlsx",index=False)
+	df.to_excel(os.path.join(directory, cuenta + ".xlsx"),index=False)
+	#df.to_excel( cuenta + ".xlsx",index=False)
 	return df
 
 def get_hashtag(cuenta):
 	api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
-	hasttag = api.by_hashtag(cuenta, count=30)
-	# data = []
+	hashtag = api.by_hashtag(cuenta, count=30)
+	
+	data = []
 
-	# for tiktok in hasttag:
-	# 	json = {'id': tiktok['id'],'descripcion':tiktok['desc'],
-	# 			'diggCount':tiktok['stats']['diggCount'],'shareCount':tiktok['stats']['shareCount'],
-	# 			'commentCount':tiktok['stats']['commentCount'],'playCount':tiktok['stats']['playCount'],
-	# 			'fecha':tiktok['createTime']
-	# 			}
+	for tiktok in hashtag:
+		json = {'id': tiktok['id'],'descripcion':tiktok['desc'],
+				'diggCount':tiktok['stats']['diggCount'],'shareCount':tiktok['stats']['shareCount'],
+				'commentCount':tiktok['stats']['commentCount'],'playCount':tiktok['stats']['playCount'],
+				'fecha':tiktok['createTime'],'usuario':"https://www.tiktok.com/@" +tiktok['author']['uniqueId']+"/video/"+tiktok['video']['id']
+				}
 
-	# 	data.append(json)
+		data.append(json)
 
-	# df = pd.DataFrame(data=data)
+	directory = 'hashtag'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
 
+	df = pd.DataFrame(data=data)
+	df['id'] = df['id'].apply(str)
+	df['fecha'] = df['fecha'].apply(convert_unix_date)
+	df.to_excel(os.path.join(directory, "hashtag.xlsx"),index=False)
 	return hasttag
 
 def get_database():
@@ -118,9 +131,34 @@ def insert_pymongo(cuenta,df):
 def index():
 
 	dbname = get_database()
-	print('fsfffs')
+
 	collections = dbname["users_items"] #list_collection_names()
-	
+	#print(collections.find({}))
+	cursor = collections.find({})
+
+	#for c in cursor:
+	#	print(c)
+
+	data = []
+	for tiktok in cursor:
+		print(tiktok['id'])
+		json = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
+				'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
+				'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
+				'fecha':str(tiktok['fecha'])
+				}
+		data.append(json)
+
+	directory = 'byusername'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
+	df = pd.DataFrame(data=data)
+	df['id'] = df['id'].apply(str)
+	df['fecha'] = df['fecha']
+	df.to_excel(os.path.join(directory, "byusername.xlsx"),index=False)
+
+
 	if request.method == 'POST':
 		print('request')
 		userfilter = request.form.get('user')
@@ -135,22 +173,56 @@ def trending():
 
 	trendingChallenges = api.by_trending(count = 30)
 
-	#for tiktok in trendingChallenges:
-  	#	print(tiktok)
+	data = []
+	for tiktok in trendingChallenges:
+		json = {'id': tiktok['id'],'descripcion':tiktok['desc'],
+				'diggCount':tiktok['stats']['diggCount'],'shareCount':tiktok['stats']['shareCount'],
+				'commentCount':tiktok['stats']['commentCount'],'playCount':tiktok['stats']['playCount'],
+				'fecha':tiktok['createTime'],'usuario':"https://www.tiktok.com/@" +tiktok['author']['uniqueId']+"/video/"+tiktok['video']['id']
+				}
+		data.append(json)
+
+	directory = 'trending'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
+	df = pd.DataFrame(data=data)
+	df['id'] = df['id'].apply(str)
+	df['fecha'] = df['fecha'].apply(convert_unix_date)
+	df.to_excel(os.path.join(directory, "trending.xlsx"),index=False)
 
 	return render_template("trending.html",trending=trendingChallenges)
 
 @app.route('/hashtag',methods=['GET','POST'])
 def hashtag():
-	#api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
+    df= []
+    if request.method == 'POST':
+        cuenta = request.form['text']
+        df = get_hashtag(cuenta)
+        #print(df)
+    return render_template("hashtag.html",hashtag=df)
 
-	#hashtag = api.by_hashtag(count = 30)
 
-	#for tiktok in trendingChallenges:
-  	#	print(tiktok)
+@app.route("/getDownloadHashtag")
+def getDownloadHashtag():
+	return send_file('../hashtag/hashtag.xlsx',
+                     mimetype='text/xlsx',
+                     attachment_filename='hashtag.xlsx',
+                     as_attachment=True)
 
-	return render_template("hashtag.html")
+@app.route("/getDownloadByusername")
+def getDownloadByusername():
+	return send_file('../byusername/byusername.xlsx',
+                     mimetype='text/xlsx',
+                     attachment_filename='byusername.xlsx',
+                     as_attachment=True)
 
+@app.route("/getDownloadTrending")
+def getDownloadTrending():
+	return send_file('../trending/trending.xlsx',
+                     mimetype='text/xlsx',
+                     attachment_filename='trending.xlsx',
+                     as_attachment=True)
 
 @app.route("/procesar" , methods=['GET','POST'])
 def procesar():
@@ -161,19 +233,24 @@ def procesar():
     df = get_username(cuenta)
     f=insert_pymongo(cuenta,df)
 
-    return render_template('notdash2.html')
+    return send_file('../byusername/'+ cuenta + '.xlsx',
+                     mimetype='text/xlsx',
+                     attachment_filename=cuenta+'.xlsx',
+                     as_attachment=True)
+
+    #return render_template('notdash2.html')
 
 
-@app.route("/procesarhashtag" , methods=['GET','POST'])
-def procesarhashtag():
-    #if request.method == 'POST':
-    cuenta = request.form['text']
-    print(cuenta)
-    print('cuenta')
+# @app.route("/procesarhashtag" , methods=['GET','POST'])
+# def procesarhashtag():
+#     #if request.method == 'POST':
+#     cuenta = request.form['text']
+#     print(cuenta)
+#     print('cuenta')
 
-    df = get_hashtag(cuenta)
-    print(df)
-    return render_template("hashtag.html",hashtag=df)
+#     df = get_hashtag(cuenta)
+#     print(df)
+#     return render_template("hashtag.html",hashtag=df)
 
 
 @app.route("/lista/<int:id>")

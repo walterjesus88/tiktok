@@ -82,7 +82,7 @@ def get_hashtag(cuenta):
 	df['id'] = df['id'].apply(str)
 	df['fecha'] = df['fecha'].apply(convert_unix_date)
 	df.to_excel(os.path.join(directory, "hashtag.xlsx"),index=False)
-	return hasttag
+	return hashtag
 
 def get_database():
     from pymongo import MongoClient

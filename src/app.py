@@ -134,30 +134,31 @@ def index():
 
 	collections = dbname["users_items"] #list_collection_names()
 	#print(collections.find({}))
+	
 	cursor = collections.find({})
 
-	#for c in cursor:
-	#	print(c)
+	if cursor:
+		data = []
+		for tiktok in cursor:
+			print(tiktok['id'])
+			json = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
+					'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
+					'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
+					'fecha':str(tiktok['fecha'])
+					}
+			data.append(json)
 
-	data = []
-	for tiktok in cursor:
-		print(tiktok['id'])
-		json = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
-				'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
-				'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
-				'fecha':str(tiktok['fecha'])
-				}
-		data.append(json)
+		directory = 'byusername'
+		if not os.path.exists(directory):
+			os.makedirs(directory)
 
-	directory = 'byusername'
-	if not os.path.exists(directory):
-		os.makedirs(directory)
-
-	df = pd.DataFrame(data=data)
-	df['id'] = df['id'].apply(str)
-	df['fecha'] = df['fecha']
-	df.to_excel(os.path.join(directory, "byusername.xlsx"),index=False)
-
+		if not data==[]:
+			df = pd.DataFrame(data=data)
+			df['id'] = df['id'].apply(str)
+			df['fecha'] = df['fecha']
+			df.to_excel(os.path.join(directory, "byusername.xlsx"),index=False)
+	else:
+		cursor = []
 
 	if request.method == 'POST':
 		print('request')

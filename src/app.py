@@ -11,6 +11,9 @@ from flask_wtf import FlaskForm
 from wtforms.fields import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 from flask import send_file
+import plotly
+import plotly.express as px
+import json
 
 #app = Flask(__name__)
 app = Flask(__name__,template_folder='../templates')
@@ -240,6 +243,46 @@ def procesar():
 
     #return render_template('notdash2.html')
 
+
+@app.route('/chart1')
+def chart1():
+    dbname = get_database()
+    collections = dbname["users_items"]
+    cursor = collections.find({})
+    data = []
+    for tiktok in cursor:
+        #print(tiktok['id'])
+        dat = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
+                'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
+                'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
+                'fecha':str(tiktok['fecha'])}
+        data.append(dat)
+
+    df = pd.DataFrame(data=data)
+    df['id'] = df['id'].apply(str)
+    df['fecha'] = df['fecha']
+
+
+    print(df)
+
+    df2 = pd.DataFrame({
+        "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
+        "Amount": [4, 1, 2, 2, 4, 5],
+        "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+    })
+    #print(df2)
+
+    #fig = px.bar(df2, x="Fruit", y="Amount", color="City", barmode="group")
+    fig = px.bar(df, x="user", y="playCount", color="user", barmode="group")
+    print(fig)
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    header="Fruit in North America"
+    description = """
+    A academic study of the number of apples, oranges and bananas in the cities of
+    San Francisco and Montreal would probably not come up with this chart.
+    """
+    return render_template('notdash2.html', graphJSON=graphJSON, header=header,description=description)
 
 # @app.route("/procesarhashtag" , methods=['GET','POST'])
 # def procesarhashtag():

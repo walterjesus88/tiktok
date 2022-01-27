@@ -3,3 +3,7 @@ venv3.8/
 tenv/
 __pycache__/
 .env
+hashtag/
+byusername/
+trending/
+requeriments.txt/

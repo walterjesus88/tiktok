@@ -31,7 +31,7 @@ def get_username(cuenta):
   	
 	api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
 
-	count = 30
+	count = 100
 	print('---cuenta--')
 	print(cuenta)
 	tiktoks = api.by_username(cuenta, count=count)
@@ -61,7 +61,7 @@ def get_username(cuenta):
 
 def get_hashtag(cuenta):
 	api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
-	hashtag = api.by_hashtag(cuenta, count=30)
+	hashtag = api.by_hashtag(cuenta, count=100)
 	
 	data = []
 
@@ -172,7 +172,7 @@ def index():
 def trending():
 	api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
 
-	trendingChallenges = api.by_trending(count = 30)
+	trendingChallenges = api.by_trending(count = 100)
 
 	data = []
 	for tiktok in trendingChallenges:

@@ -15,6 +15,11 @@ import plotly
 import plotly.express as px
 import json
 
+from pymongo import MongoClient
+import pymongo
+#import ssl
+import certifi
+
 #app = Flask(__name__)
 app = Flask(__name__,template_folder='../templates')
 bootstrap = Bootstrap(app)
@@ -87,11 +92,34 @@ def get_hashtag(cuenta):
 	df.to_excel(os.path.join(directory, "hashtag.xlsx"),index=False)
 	return hashtag
 
+def get_sound(sound):
+	api = TikTokApi.get_instance()
+	count = 30
+	#sound_id = "7044682004830702342"
+	sounds = api.by_sound(sound, count=count)
+	data = []
+
+	for tiktok in sounds:
+		json = {'id': tiktok['id'],'descripcion':tiktok['desc'],
+				'diggCount':tiktok['stats']['diggCount'],'shareCount':tiktok['stats']['shareCount'],
+				'commentCount':tiktok['stats']['commentCount'],'playCount':tiktok['stats']['playCount'],
+				'fecha':tiktok['createTime'],'usuario':"https://www.tiktok.com/@" +tiktok['author']['uniqueId']+"/video/"+tiktok['video']['id']
+				}
+
+		data.append(json)
+
+	directory = 'sounds'
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
+	df = pd.DataFrame(data=data)
+	df['id'] = df['id'].apply(str)
+	df['fecha'] = df['fecha'].apply(convert_unix_date)
+	df.to_excel(os.path.join(directory, "sounds.xlsx"),index=False)
+	return sounds
+
 def get_database():
-    from pymongo import MongoClient
-    import pymongo
-    #import ssl
-    import certifi
+
     ca = certifi.where()
 
     # Provide the mongodb atlas url to connect python to mongodb using pymongo
@@ -134,33 +162,32 @@ def insert_pymongo(cuenta,df):
 def index():
 
 	dbname = get_database()
-
 	collections = dbname["users_items"] #list_collection_names()
-	#print(collections.find({}))
-	cursor = collections.find({})
+	#print(collections.find({}))	
+	cursor = collections.find({}).sort([("fecha", pymongo.DESCENDING)])
 
-	#for c in cursor:
-	#	print(c)
+	if cursor:
+		data = []
+		for tiktok in cursor:
+			print(tiktok['id'])
+			json = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
+					'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
+					'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
+					'fecha':str(tiktok['fecha'])
+					}
+			data.append(json)
 
-	data = []
-	for tiktok in cursor:
-		print(tiktok['id'])
-		json = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
-				'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
-				'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
-				'fecha':str(tiktok['fecha'])
-				}
-		data.append(json)
+		directory = 'byusername'
+		if not os.path.exists(directory):
+			os.makedirs(directory)
 
-	directory = 'byusername'
-	if not os.path.exists(directory):
-		os.makedirs(directory)
-
-	df = pd.DataFrame(data=data)
-	df['id'] = df['id'].apply(str)
-	df['fecha'] = df['fecha']
-	df.to_excel(os.path.join(directory, "byusername.xlsx"),index=False)
-
+		if not data==[]:
+			df = pd.DataFrame(data=data)
+			df['id'] = df['id'].apply(str)
+			df['fecha'] = df['fecha']
+			df.to_excel(os.path.join(directory, "byusername.xlsx"),index=False)
+	else:
+		cursor = []
 
 	if request.method == 'POST':
 		print('request')
@@ -205,6 +232,18 @@ def hashtag():
         #print(df)
     return render_template("hashtag.html",hashtag=df)
 
+@app.route('/sound',methods=['GET','POST'])
+def sound():
+	df= []
+	if request.method == 'POST':
+		sound = request.form['text']
+		df = get_sound(sound)
+
+	
+	print('sounds')
+	print(df)
+	return render_template("sound.html",sound=df)
+
 
 @app.route("/getDownloadHashtag")
 def getDownloadHashtag():
@@ -226,6 +265,14 @@ def getDownloadTrending():
                      mimetype='text/xlsx',
                      attachment_filename='trending.xlsx',
                      as_attachment=True)
+
+@app.route("/getDownloadSound")
+def getDownloadSound():
+	return send_file('../sounds/sound.xlsx',
+                     mimetype='text/xlsx',
+                     attachment_filename='sounds.xlsx',
+                     as_attachment=True)
+
 
 @app.route("/procesar" , methods=['GET','POST'])
 def procesar():
@@ -253,14 +300,15 @@ def chart1():
     for tiktok in cursor:
         #print(tiktok['id'])
         dat = {'user':tiktok['user'],'id': tiktok['id'],'descripcion':tiktok['descripcion'],
-                'diggCount':tiktok['diggCount'],'shareCount':tiktok['shareCount'],
+                'diggCount':float(tiktok['diggCount']),'shareCount':tiktok['shareCount'],
                 'commentCount':tiktok['commentCount'],'playCount':tiktok['playCount'],
                 'fecha':str(tiktok['fecha'])}
         data.append(dat)
 
     df = pd.DataFrame(data=data)
     df['id'] = df['id'].apply(str)
-    df['fecha'] = df['fecha']
+    df=df.sort_values(by=['fecha'])
+    #df['fecha'] = df['fecha']
 
 
     print(df)
@@ -270,18 +318,24 @@ def chart1():
         "Amount": [4, 1, 2, 2, 4, 5],
         "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
     })
-    #print(df2)
+    print(df2)
 
     #fig = px.bar(df2, x="Fruit", y="Amount", color="City", barmode="group")
-    fig = px.bar(df, x="user", y="playCount", color="user", barmode="group")
-    print(fig)
+    #fig = px.bar(df, x="user", y="playCount", color="user", barmode="group")
+    #print(fig)
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    header="Fruit in North America"
+    #graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    header="Estadísticas Diggcount en el tiempo por tipo de Usuario"
     description = """
-    A academic study of the number of apples, oranges and bananas in the cities of
-    San Francisco and Montreal would probably not come up with this chart.
+    Número de Diggcount sobre las fechas de publicación de una determinada cuenta
     """
+
+    #import plotly.express as px
+	#df = px.data.gapminder().query("continent == 'Oceania'")
+    fig = px.line(df, x='fecha', y='diggCount',color='user',markers=True)
+	#fig.show()
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
     return render_template('notdash2.html', graphJSON=graphJSON, header=header,description=description)
 
 # @app.route("/procesarhashtag" , methods=['GET','POST'])

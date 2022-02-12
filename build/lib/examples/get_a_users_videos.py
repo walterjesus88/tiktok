@@ -13,9 +13,8 @@ userPosts = api.user_posts(
     30,
 )
 # Loops over every tiktok
-
 for tiktok in userPosts:
     # Prints the text of the tiktok
-    print(tiktok)
+    print(tiktok["desc"])
 
 print(len(userPosts))

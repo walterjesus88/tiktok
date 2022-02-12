@@ -307,17 +307,8 @@ def chart1():
 
     df = pd.DataFrame(data=data)
     df['id'] = df['id'].apply(str)
-    df=df.sort_values(by=['fe
-# @app.route("/procesarhashtag" , methods=['GET','POST'])
-# def procesarhashtag():
-#     #if request.method == 'POST':
-#     cuenta = request.form['text']
-#     print(cuenta)
-#     print('cuenta')
+    df=df.sort_values(by=['fecha'])
 
-#     df = get_hashtag(cuenta)
-#     print(df)
-#     return render_template("hashtag.html",hashtag=df)
 
     print(df)
 

@@ -11,7 +11,11 @@ api = TikTokApi.get_instance()
 
 #for tiktok in tiktoks:
 #    print(tiktok)
-url='https://www.tiktok.com/@kasssinaloa1/video/7058117598390668550'
-tiktok_url = api.get_tiktok_by_url(url)
-print(tiktok_url)
-https://github.com/cubernetes/TikTokCommentScraper
+# url='https://www.tiktok.com/@kasssinaloa1/video/7058117598390668550'
+# tiktok_url = api.get_tiktok_by_url(url)
+# print(tiktok_url)
+# https://github.com/cubernetes/TikTokCommentScraper
+
+tt = api.by_comment(device_id="7062529838243038725")
+
+print(tt)

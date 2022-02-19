@@ -1,50 +1,52 @@
-<!doctype html>
+{% extends 'base.html' %} {% block content %}
+
+<!DOCTYPE html>
 <html>
-<body style="font-family:arial, sans-serif">
-    <h1>{{header}}</h1>
+  <body style="font-family: arial, sans-serif">
+    <h1><center>{{header}}</center></h1>
     <h6><a href="/">Return to index page</a></h6>
     <div id="chart" class="chart"></div>
-    <div>{{description}}</div>
-    
+    <div><center>{{description}}</center></div>
+
     <div id="myDiv" class="chart"></div>
     <div id="linear" class="chart"></div>
+  </body>
 
-</body>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript">
+        var graphs = {{graphJSON | safe}};
+        Plotly.newPlot('chart',graphs,{});
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
-    var graphs = {{graphJSON | safe}};
-    Plotly.newPlot('chart',graphs,{}); 
+    //     var data = [{
+    //   values: [19, 26, 55],
+    //   labels: ['Residential', 'Non-Residential', 'Utility'],
+    //   type: 'pie'
+    // }];
 
-//     var data = [{
-//   values: [19, 26, 55],
-//   labels: ['Residential', 'Non-Residential', 'Utility'],
-//   type: 'pie'
-// }];
+    // var layout = {
+    //   height: 400,
+    //   width: 500
+    // };
 
-// var layout = {
-//   height: 400,
-//   width: 500
-// };
-
-// Plotly.newPlot('myDiv', data, layout);
+    // Plotly.newPlot('myDiv', data, layout);
 
 
-// var trace1 = {
-//   x: [1, 2, 3, 4],
-//   y: [10, 15, 13, 17],
-//   type: 'scatter'
-// };
+    // var trace1 = {
+    //   x: [1, 2, 3, 4],
+    //   y: [10, 15, 13, 17],
+    //   type: 'scatter'
+    // };
 
-// var trace2 = {
-//   x: [1, 2, 3, 4],
-//   y: [16, 5, 11, 9],
-//   type: 'scatter'
-// };
+    // var trace2 = {
+    //   x: [1, 2, 3, 4],
+    //   y: [16, 5, 11, 9],
+    //   type: 'scatter'
+    // };
 
-// var data = [trace1, trace2];
+    // var data = [trace1, trace2];
 
-// Plotly.newPlot('linear', data);
-
-</script>
+    // Plotly.newPlot('linear', data);
+  </script>
 </html>
+
+{% endblock %}

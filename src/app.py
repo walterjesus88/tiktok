@@ -268,7 +268,7 @@ def getDownloadTrending():
 
 @app.route("/getDownloadSound")
 def getDownloadSound():
-	return send_file('../sounds/sound.xlsx',
+	return send_file('../sounds/sounds.xlsx',
                      mimetype='text/xlsx',
                      attachment_filename='sounds.xlsx',
                      as_attachment=True)
@@ -324,7 +324,7 @@ def chart1():
     #print(fig)
 
     #graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    header="Estadísticas Diggcount en el tiempo por tipo de Usuario"
+    header="Estadísticas Diggcount por Usuario"
     description = """
     Número de Diggcount sobre las fechas de publicación de una determinada cuenta
     """

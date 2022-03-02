@@ -13,7 +13,7 @@ from wtforms.validators import DataRequired
 from flask import send_file
 import plotly
 import plotly.express as px
-import json
+
 
 from pymongo import MongoClient
 import pymongo
@@ -70,16 +70,17 @@ def get_username(cuenta):
 def get_hashtag(cuenta):
 	api = TikTokApi.get_instance(custom_verifyFp="verify_kxywv8jc_kkSTc3Ec_RPV8_4G12_AAjM_pJHR3PvDqnkl",use_test_endpoints=True)
 	hashtag = api.by_hashtag(cuenta, count=100)
-	
+	#print(hashtag)
 	data = []
 
 	for tiktok in hashtag:
 		json = {'id': tiktok['id'],'descripcion':tiktok['desc'],
 				'diggCount':tiktok['stats']['diggCount'],'shareCount':tiktok['stats']['shareCount'],
 				'commentCount':tiktok['stats']['commentCount'],'playCount':tiktok['stats']['playCount'],
-				'fecha':tiktok['createTime'],'usuario':"https://www.tiktok.com/@" +tiktok['author']['uniqueId']+"/video/"+tiktok['video']['id']
+				'fecha':tiktok['createTime'],'video':tiktok['video']['id'],'author':tiktok['author']['uniqueId'],'usuario':"https://www.tiktok.com/@" +tiktok['author']['uniqueId']+"/video/"+tiktok['video']['id']
 				}
-
+		print(json['fecha'])
+		json['fecha_f']=convert_unix_date(json['fecha'])
 		data.append(json)
 
 	directory = 'hashtag'
@@ -90,7 +91,8 @@ def get_hashtag(cuenta):
 	df['id'] = df['id'].apply(str)
 	df['fecha'] = df['fecha'].apply(convert_unix_date)
 	df.to_excel(os.path.join(directory, "hashtag.xlsx"),index=False)
-	return hashtag
+	print(data)
+	return data
 
 def get_sound(sound):
 	api = TikTokApi.get_instance()
@@ -216,21 +218,28 @@ def trending():
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	df = pd.DataFrame(data=data)
-	df['id'] = df['id'].apply(str)
-	df['fecha'] = df['fecha'].apply(convert_unix_date)
-	df.to_excel(os.path.join(directory, "trending.xlsx"),index=False)
+	if not data==[]:
+		df = pd.DataFrame(data=data)
+		df['id'] = df['id'].apply(str)
+		df['fecha'] = df['fecha'].apply(convert_unix_date)
+		df.to_excel(os.path.join(directory, "trending.xlsx"),index=False)
 
 	return render_template("trending.html",trending=trendingChallenges)
 
 @app.route('/hashtag',methods=['GET','POST'])
 def hashtag():
     df= []
+    graph=[]
+    cuenta=''
     if request.method == 'POST':
         cuenta = request.form['text']
         df = get_hashtag(cuenta)
-        #print(df)
-    return render_template("hashtag.html",hashtag=df)
+            
+        df1 = pd.DataFrame(data=df)     
+        fig = px.line(df1, x='fecha_f', y='playCount',color='usuario',markers=True)
+        graph = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template("hashtag.html",hashtag=df,graphJSON=graph, header=cuenta,description='Grafico play - Usuario')
 
 @app.route('/sound',methods=['GET','POST'])
 def sound():
@@ -308,10 +317,7 @@ def chart1():
     df = pd.DataFrame(data=data)
     df['id'] = df['id'].apply(str)
     df=df.sort_values(by=['fecha'])
-
-
     print(df)
-
     df2 = pd.DataFrame({
         "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
         "Amount": [4, 1, 2, 2, 4, 5],
@@ -337,16 +343,6 @@ def chart1():
 
     return render_template('notdash2.html', graphJSON=graphJSON, header=header,description=description)
 
-# @app.route("/procesarhashtag" , methods=['GET','POST'])
-# def procesarhashtag():
-#     #if request.method == 'POST':
-#     cuenta = request.form['text']
-#     print(cuenta)
-#     print('cuenta')
-
-#     df = get_hashtag(cuenta)
-#     print(df)
-#     return render_template("hashtag.html",hashtag=df)
 
 
 @app.route("/lista/<int:id>")

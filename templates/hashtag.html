@@ -1,103 +1,93 @@
+{% extends 'base.html' %} {% block content %}
 
-{% extends 'base.html' %} 
-{% block content %} 
+<div id="exTab1" class="container">
+  <ul class="nav nav-pills">
+    <li class="active">
+      <a href="#1a" data-toggle="tab">Datos</a>
+    </li>
+    <li><a href="#2a" data-toggle="tab">Graficos</a></li>
+  </ul>
 
-
-
-<div class="container">
-  <div class="row">
-  
-    <div class="col-md-6">
-    	<form class="form-inline" method="POST" action="{{ url_for('hashtag') }}">
-		  <div class="form-group">
-		    <div class="input-group">
-		        <span class="input-group-addon">Ingrese el hashtag a buscar</span>
-		    		<input name="text">
-		    </div>
-		    <button type="submit" class="btn btn-success">Agregar</button>
-		  </div>
-		</form>
+  <div class="tab-content">
+    <div class="tab-pane active" id="1a">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <form
+              class="form-inline"
+              method="POST"
+              action="{{ url_for('hashtag') }}"
+            >
+              <div class="form-group">
+                <div class="input-group">
+                  <span class="input-group-addon"
+                    >Ingrese el hashtag a buscar</span
+                  >
+                  <input name="text" />
+                </div>
+                <button type="submit" class="btn btn-success">Agregar</button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <button class="btn btn-success">
+              <a href="/getDownloadHashtag">Descargar</a>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+          <table class="table table-condensed">
+            <thead class="table border">
+              <tr>
+                <th scope="col">Descripcion</th>
+                <th scope="col">diggCount</th>
+                <th scope="col">shareCount</th>
+                <th scope="col">commentCount</th>
+                <th scope="col">playCount</th>
+                <th scope="col">Usuario</th>
+                <th scope="col">fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for col in hashtag %}
+              <tr>
+                <td>{{ col.descripcion }}</td>
+                <td>{{ col.diggCount }}</td>
+                <td>{{ col.commentCount }}</td>
+                <td>{{ col.shareCount }}</td>
+                <td>{{ col.playCount }}</td>
+                <td>
+                  <a
+                    href="https://www.tiktok.com/@{{ col.author}}/video/{{col.video }}"
+                    target="_blank"
+                    >{{col.author}}</a
+                  >
+                </td>
+                <td>{{ col.fecha_f }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <div>
-		<button class="btn btn-success"><a href="/getDownloadHashtag">Descargar</a></button>
+    <div class="tab-pane active" id="2a">
+      <div class="container">
+        <div class="col-md-12">
+          <h3><center>{{header}}</center></h3>
+
+          <div id="chart" class="chart"></div>
+          <div><center>{{description}}</center></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-<div class="container">
-	<div class="row">
-		<table class="table table-condensed">
-		  <thead class="table border">
-		    <tr>
-		  
-		      <th scope="col">Descripcion</th>
-		      <th scope="col">diggCount</th>
-		      <th scope="col">shareCount</th>
-		      <th scope="col">commentCount</th>
-		      <th scope="col">playCount</th>
-		      <th scope="col">Usuario</th>
-		      <th scope="col">fecha</th>
-		    </tr>
-		  </thead>
-		  <tbody>
-		  	{% for col in hashtag %}
-		    <tr>
-		      <td>{{ col.desc }}</td>
-			  <td>{{ col.stats.diggCount }}</td>
-			  <td>{{ col.stats.commentCount }}</td>
-			  <td>{{ col.stats.shareCount }}</td>
-			  <td>{{ col.stats.playCount }}</td>
-			  <td><a href="https://www.tiktok.com/@{{ col.author.uniqueId}}/video/{{col.video.id }}" target="_blank">{{col.author.uniqueId}}</a></td>
-			  <td>{{col.createTime}}</td>
-
-		    </tr>
-		  	{% endfor %}
-		  
-		  </tbody>
-		</table>
-	</div>
-</div>
-
-
-
-
-
-  
-		    
-		      <div class="container-fluid">			  
-
-				
-		  			{% for col in hashtag %}
-
-				  <div class="col-sm-6 col-md-6 thumbnail ">
-				  	<div class="col-md-8 ">
-					    <div class="f ">
-					      <div class="embed-responsive embed-responsive-4by3">
-							<iframe frameborder="0" class="embed-responsive-item" src={{ col.video.downloadAddr }}></iframe>
-						  </div>
-					    </div>
-				    </div>
-				  	<div class="col-md-4 ">
-				  		<h5>{{ col.desc}}</h5>
-				  		 <ul class="caption">
-					        <li><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-heart" aria-hidden="true">{{ col.stats.diggCount }}</span></button></li>
-					        <li><button type="button" class="btn btn-info"><span class="glyphicon glyphicon-comment" aria-hidden="true">{{ col.stats.commentCount }}</span></button></li>
-					        <li><button type="button" class="btn btn-warning"><span class="glyphicon glyphicon-share" aria-hidden="true">{{ col.stats.shareCount }}</span></button></li>
-					        <li><button type="button" class="btn btn-success"><span class="glyphicon glyphicon-play" aria-hidden="true">{{ col.stats.playCount }}</span></button></li>
-					        <li><a href="https://www.tiktok.com/@{{ col.author.uniqueId}}/video/{{col.video.id }}" target="_blank">{{col.author.uniqueId}}</a></li>
-					    </ul>
-				  	</div>
-				  </div>
-		  			{% endfor %}				  
-				
-
-			  </div>
-
-
-		    
-
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graphs = {{graphJSON | safe}};
+  Plotly.newPlot('chart',graphs,{});
+</script>
 {% endblock %}
-<style>
-
- 
-	 
-</style>
